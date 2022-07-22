@@ -1,8 +1,4 @@
-/SPDX-License-Identifier: UNLICENSED
-
-// Solidity files have to start with this pragma.
-// It will be used by the Solidity compiler to validate its version.
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.0;
 
 // We import this library to be able to use console.log
 import "hardhat/console.sol";
@@ -20,14 +16,14 @@ contract Token is Main {
     uint256 public totalSupply = 1000000;
 
     // An address type variable is used to store ethereum accounts.
-    address public owner;
+    address public tokenOwner;
 
     // A mapping is a key/value map. Here we store each account balance.
     mapping(address => uint256) balances;
 
     // The Transfer event helps off-chain aplications understand
     // what happens within your contract.
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event TransferToken(address indexed _from, address indexed _to, uint256 _value);
 
     /**
      * Contract initialization.
@@ -36,7 +32,7 @@ contract Token is Main {
         // The totalSupply is assigned to the transaction sender, which is the
         // account that is deploying the contract.
         balances[msg.sender] = totalSupply;
-        owner = msg.sender;
+        tokenOwner = msg.sender;
     }
 
     /**
@@ -45,7 +41,7 @@ contract Token is Main {
      * The `external` modifier makes a function *only* callable from outside
      * the contract.
      */
-    function transfer(address to, uint256 amount) external {
+    function transferToken(address to, uint256 amount) external {
         // Check if the transaction sender has enough tokens.
         // If `require`'s first argument evaluates to `false` then the
         // transaction will revert.
@@ -74,7 +70,7 @@ contract Token is Main {
      * The `view` modifier indicates that it doesn't modify the contract's
      * state, which allows us to call it without executing a transaction.
      */
-    function balanceOf(address account) external view returns (uint256) {
+    function tokenBalanceOf(address account) external view returns (uint256) {
         return balances[account];
     }
 }
