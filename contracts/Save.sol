@@ -9,6 +9,10 @@ contract Save is Bank {
     mapping(address => uint) _savingsPeriod;
 
 
+    //gets balance of savings wallet account
+    function getSavingsLockUpPeriod(address account) public view returns (uint256) {
+        return _savingsPeriod[account];
+    }
 
     function setSavingsPeriod (uint unlockTime) public {
         require(block.timestamp < unlockTime, "Unlock time should be in the future");
