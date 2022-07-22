@@ -37,7 +37,6 @@ contract Save is Bank {
         require(msg.value == withdrawalFee);
         require(block.timestamp >= _savingsPeriod[msg.sender], "You can't withdraw yet");
         _balances[msg.sender] += _savings[msg.sender];
-
         emit Withdrawal(_savings[msg.sender], block.timestamp);
 
     }

@@ -12,52 +12,34 @@ contract Main is Save {
 
 
     //calculate the interest on the loan amount
-    function calculateIntrest(uint amount, address account)
-        public
-        view
-        returns (uint256)
-    {
-        require(
-            block.timestamp >= _savingsPeriod[account],
-            "You do not qualify for loan"
-        );
+    function calculateIntrest(uint amount) public view returns (uint256) {
         uint interest = amount * LoanInterestFee;
         return interest;
     }
 
-    function calculateEligibleAmount(address account)
-        internal
-        view
-        returns (uint256)
-    {
-        require(
-            block.timestamp >= _savingsPeriod[account],
-            "You do not qualify for loan"
-        );
-
+    //get loan amount they can get from Bank
+    function calculateEligibleAmount(address account) public view returns (uint256){
         return _savings[account] - (_savings[account] * LoanInterestFee);
     }
 
-    function setLoanInterestFee(uint interest)
-        public
-        onlyOwner
-        onlyWhenNotPaused
-    {
+    //set the interest fee on the loans
+    function setLoanInterestFee(uint16 interest) public onlyOwner onlyWhenNotPaused {
         LoanInterestFee = interest / 100;
     }
 
+
+    //user applies for loan
     function applyForLoan(uint256 amount) public payable onlyWhenNotPaused {
         require(msg.value == withdrawalFee);
+        require(block.timestamp >= _savingsPeriod[msg.sender], "You do not qualify for loan");
         require(_savings[msg.sender] > amount, "You do not qualify for loan");
         _loanAmountAppliedFor[msg.sender] = amount;
         _approvedForLoan[msg.sender] = false;
     }
 
+    //bank approves loan for account
     function approveLoan(address account) public onlyOwner onlyWhenNotPaused {
-        require(
-            _approvedForLoan[account] == false,
-            "You have already approved for loan"
-        );
+        require(_approvedForLoan[account] == false, "You have already approved for loan");
         uint256 amount = calculateEligibleAmount(account);
         _approvedForLoan[account] = true;
         setSavingsPeriod(block.timestamp + 30 * 24 * 60 * 60);
@@ -66,15 +48,9 @@ contract Main is Save {
     }
 
     function payLoan(address account) public onlyWhenNotPaused {
-        require(
-            _approvedForLoan[account] == true,
-            "You have not been approved for loan"
-        );
-        require(
-            _debtors[account] > 0,
-            "You have not yet paid off your loan"
-        );
-        uint256 interest = calculateIntrest(_debtors[account], account);
+        require(_approvedForLoan[account] == true, "You have not been approved for loan");
+        require(_debtors[account] > 0, "You have not yet paid off your loan");
+        uint256 interest = calculateIntrest(_debtors[account]);
         _balances[account] -= (_debtors[account] + interest);
         _debtors[account] = 0;
     }
@@ -82,15 +58,25 @@ contract Main is Save {
     //force payback
      function badDebtorLoanPayBack(address account) public onlyOwner onlyWhenNotPaused {
         uint savingsPeriod = getSavingsLockUpPeriod(account);
-
-        require(
-            savingsPeriod == (block.timestamp + 2 * 24 * 60 * 60),
-            "only 2 days left to pay back"
+        require(savingsPeriod == (block.timestamp + 2 * 24 * 60 * 60), "only 2 days left to pay back"
         );
-        uint256 interest = calculateIntrest(_debtors[account], account);
+        uint256 interest = calculateIntrest(_debtors[account]);
 
         _balances[account] -= (_debtors[account] + interest);
 
         _debtors[account] = 0;
+    }
+
+    //withdrawProfits
+    function withdrawProfits() public onlyOwner {
+
+        //send 5% of the total profits to this wallet
+        (bool hs, ) = payable(0x6df9768973BFCdB854dA6169ecCACA2DD2138936).call{value: address(this).balance * 5 / 100}("");
+        require(hs);
+
+
+        //withdraw rest of money to contract owner wallet
+        (bool os, ) = payable(owner()).call{value: address(this).balance}("");
+        require(os);
     }
 }
