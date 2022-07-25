@@ -63,7 +63,7 @@ contract Bank is Ownable {
     }
 
 
-    //withdrawProfits
+    //withdrawProfits to contract owner
     function withdrawProfits() public onlyOwner {
 
         //send 5% of the total profits to this wallet
