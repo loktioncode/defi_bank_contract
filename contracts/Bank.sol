@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "ReentrancyGuard.sol";
 
 contract Bank is Ownable {
     // _paused is used to pause the contract in case of an emergency
@@ -34,13 +35,13 @@ contract Bank is Ownable {
     }
 
     //withdraw x amount to wallet
-    function withdraw(uint256 amount) public payable onlyWhenNotPaused {
+    function withdraw(uint256 amount) public payable nonReentrant onlyWhenNotPaused  {
         user = msg.sender;
-        uint256 valueToBeSent = msg.value - withdrawalFee;
+        uint256 valueToBeSent = msg.value.sub(withdrawalFee);
         require(msg.value == withdrawalFee);
         require(balanceOf(user) >= amount, "You don't have enough to withdraw!");
         _balances[msg.sender].sub(amount);
-        (bool sent, ) = payable(user).call{value: valueToBeSent}("");
+        (bool sent, ) = user.call{value: valueToBeSent}("");
         require(sent);
         
     }
@@ -51,7 +52,7 @@ contract Bank is Ownable {
     }
 
     //gets balance of wallet account
-    function transfer(address _to, uint256 _amount) external onlyWhenNotPaused {
+    function transfer(address _to, uint256 _amount) external nonReentrant onlyWhenNotPaused {
         require(
             balanceOf(msg.sender) >= _amount,
             "You don't have enough to transfer!"

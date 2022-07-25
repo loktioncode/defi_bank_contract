@@ -30,23 +30,23 @@ describe("Withdraw funds from bank", function () {
   
       const Bank = await ethers.getContractFactory("Bank");
       const bank = await Bank.deploy();
-
+      
       await bank.deposit({from: owner.address, value: 5})
-      await expect(bank.withdraw(1)).to.be.fulfilled;
+      await expect(bank.withdraw({value: 1})).to.be.fulfilled;
   
     });
   });
 
-  describe("Transfer funds between accounts", function () {
-    it("Should transfer funds between users", async function () {
-      const [owner, addr1, addr2] = await ethers.getSigners();
+  // describe("Transfer funds between accounts", function () {
+  //   it("Should transfer funds between users", async function () {
+  //     const [owner, addr1, addr2] = await ethers.getSigners();
   
-      const Bank = await ethers.getContractFactory("Bank");
-      const bank = await Bank.deploy();
+  //     const Bank = await ethers.getContractFactory("Bank");
+  //     const bank = await Bank.deploy();
     
-      await bank.deposit({from: owner.address, value: 5});
+  //     await bank.deposit({from: owner.address, value: 5});
    
-      expect(await bank.transfer(addr1.address, 2)).to.changeEtherBalance(bank, [owner, addr1], [-2, 2]);
+  //     expect(await bank.transfer(addr1.address, 2)).to.changeEtherBalance(bank, [owner, addr1], [-2, 2]);
   
-    });
-  });
+  //   });
+  // });

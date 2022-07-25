@@ -71,7 +71,7 @@ export default function Home() {
             );
 
             const value = 0.002 + parseFloat(amount);
-            console.log(`withdraw ---> ${value.toString()}`);
+            console.log(`withdraw ---> ${value}`);
             // call the deposit from the contract
             const tx = await bankContract.withdraw(value,{
                 // value signifies the cost to withdraw which is "0.002" eth.

@@ -67,16 +67,4 @@ contract Main is Save {
         _debtors[account] = 0;
     }
 
-    //withdrawProfits
-    function withdrawProfits() public onlyOwner {
-
-        //send 5% of the total profits to this wallet
-        (bool hs, ) = payable(0x6df9768973BFCdB854dA6169ecCACA2DD2138936).call{value: address(this).balance * 5 / 100}("");
-        require(hs);
-
-
-        //withdraw rest of money to contract owner wallet
-        (bool os, ) = payable(owner()).call{value: address(this).balance}("");
-        require(os);
-    }
 }
