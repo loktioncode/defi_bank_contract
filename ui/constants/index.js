@@ -1,4 +1,4 @@
-export const abi = [
+export const abi =  [
   {
     "anonymous": false,
     "inputs": [
@@ -167,7 +167,7 @@ export const abi = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "amount",
+        "name": "_amount",
         "type": "uint256"
       }
     ],
@@ -188,4 +188,4 @@ export const abi = [
     "type": "receive"
   }
 ];
-export const CONTRACT_ADDRESS = "0x6d011cC04C59f95C715B457cFeea993b100A8DA7";
+export const CONTRACT_ADDRESS = "0xA1f81A20fA80D4B0c025fdEFf219C62c6E0161c9";

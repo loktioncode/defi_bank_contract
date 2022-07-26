@@ -44,8 +44,7 @@ export default function Home() {
      * @param {*} needSigner - True if you need the signer, default false otherwise
      */
     const getProviderOrSigner = async (needSigner = false) => {
-        // Connect to Metamask
-        // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
+      
         const provider = await web3ModalRef.current.connect();
         const web3Provider = new providers.Web3Provider(provider);
 
@@ -53,6 +52,7 @@ export default function Home() {
         const { chainId } = await web3Provider.getNetwork();
         if (chainId !== 4) {
             window.alert("Change the network to Rinkeby");
+            setError("Change the network to Rinkeby");
             throw new Error("Change network to Rinkeby");
         }
 
@@ -75,8 +75,7 @@ export default function Home() {
             );
 
             let amount = utils.parseEther(inputAmount);
-            console.log(typeof amount);
-
+ 
             // call the deposit from the contract
             const tx = await bankContract.withdraw(amount, {
                 // value signifies the cost to withdraw which is "0.002" eth.
@@ -90,6 +89,7 @@ export default function Home() {
             // get the updated number of addresses in the whitelist
             await getBalance();
         } catch (err) {
+            setError(`${err}`);
             console.error(err);
         }
     };
@@ -116,6 +116,7 @@ export default function Home() {
             await getBalance();
         } catch (err) {
             console.error(err);
+            setError(`${err}`);
         }
     };
 
@@ -141,6 +142,7 @@ export default function Home() {
             }
         } catch (err) {
             console.error(err.message);
+            setError(`${err}`);
         }
     }, []);
 
@@ -165,6 +167,7 @@ export default function Home() {
             await getBalance();
         } catch (err) {
             console.error(err);
+            setError(`${err}`);
         }
     };
 
@@ -192,6 +195,7 @@ export default function Home() {
 
         } catch (err) {
             console.error(err);
+            setError(`${err}`);
         }
     }, []);
 
@@ -206,6 +210,8 @@ export default function Home() {
 
         } catch (err) {
             console.error(err);
+            setError(`${err}`);
+
         }
     }, []);
 
