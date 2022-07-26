@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 
 contract Bank is Ownable, ReentrancyGuard {
+    using SafeMath for uint256;
+
     // _paused is used to pause the contract in case of an emergency
     bool public _paused;
     address public user;
@@ -14,7 +16,6 @@ contract Bank is Ownable, ReentrancyGuard {
 
     uint withdrawalFee = 0.002 ether;
 
-    using SafeMath for uint256;
 
     modifier onlyWhenNotPaused() {
         require(!_paused, "Contract currently paused");
@@ -37,15 +38,13 @@ contract Bank is Ownable, ReentrancyGuard {
     }
 
     //withdraw x amount to wallet
-    function withdraw(uint256 amount) public payable nonReentrant onlyWhenNotPaused  {
+    function withdraw(uint256 _amount) public payable nonReentrant onlyWhenNotPaused  {
         user = msg.sender;
-        uint256 valueToBeSent = msg.value.sub(withdrawalFee);
         require(msg.value == withdrawalFee);
-        require(balanceOf(user) >= amount, "You don't have enough to withdraw!");
-        _balances[msg.sender].sub(amount);
-        (bool sent, ) = user.call{value: valueToBeSent}("");
+        require(_balances[msg.sender] >= _amount, "You don't have enough to withdraw!");
+        _balances[msg.sender].sub(_amount);
+        (bool sent, ) = payable(user).call{value: _amount}("");
         require(sent);
-        
     }
 
     //gets balance of wallet account

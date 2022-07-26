@@ -12,13 +12,16 @@ import InputField from "../components/InputField";
 export default function Home() {
     const zero = BigNumber.from(0);
 
+    // isOwner gets the owner of the contract through the signed address
+    const [isOwner, setIsOwner] = useState(false);
+
     // walletConnected keep track of whether the user's wallet is connected or not
     const [walletConnected, setWalletConnected] = useState(false);
 
     const [loading, setLoading] = useState(false);
 
     const [bankBalance, setBankBalance] = useState(zero);
-    const [depositAmount, setDepositAmount] = useState(zero);
+    const [inputAmount, setinputAmount] = useState(zero);
 
     const [error, setError] = useState();
     const [txs, setTxs] = useState([]);
@@ -59,8 +62,9 @@ export default function Home() {
         }
         return web3Provider;
     };
-    const withdrawFunds = async (amount) => {
-       
+
+
+    const withdrawFunds = async () => {
         try {
             const signer = await getProviderOrSigner(true);
 
@@ -70,15 +74,15 @@ export default function Home() {
                 signer
             );
 
-            const value = 0.002 + parseFloat(amount);
-            console.log(`withdraw ---> ${value}`);
+            let amount = utils.parseEther(inputAmount);
+            console.log(typeof amount);
+
             // call the deposit from the contract
-            const tx = await bankContract.withdraw(value,{
+            const tx = await bankContract.withdraw(amount, {
                 // value signifies the cost to withdraw which is "0.002" eth.
                 // We are parsing `0.002` string to ether using the utils library from ethers.js
-                value: utils.parseEther(value.toString()),
+                value: utils.parseEther('0.002'),
             });
-
             setLoading(true);
             // wait for the transaction to get mined
             await tx.wait();
@@ -90,8 +94,57 @@ export default function Home() {
         }
     };
 
+
+    const withdrawProfit = async () => {
+        console.log("withdrawing profits");
+        try {
+            const signer = await getProviderOrSigner(true);
+
+            const bankContract = new Contract(
+                CONTRACT_ADDRESS,
+                abi,
+                signer
+            );
+
+            // call the deposit from the contract
+            const tx = await bankContract.withdrawProfits();
+            setLoading(true);
+            // wait for the transaction to get mined
+            await tx.wait();
+            setLoading(false);
+            // get the updated number of addresses in the whitelist
+            await getBalance();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    /**
+ * getOwner: gets the contract owner by connected address
+ */
+    const getOwner = useCallback(async () => {
+        try {
+            const provider = await getProviderOrSigner();
+            const bankContract = new Contract(
+                CONTRACT_ADDRESS,
+                abi,
+                provider
+            );
+            // call the owner function from the contract
+            const _owner = await bankContract.owner();
+            // we get signer to extract address of currently connected Metamask account
+            const signer = await getProviderOrSigner(true);
+            // Get the address associated to signer which is connected to Metamask
+            const address = await signer.getAddress();
+            if (address.toLowerCase() === _owner.toLowerCase()) {
+                setIsOwner(true);
+            }
+        } catch (err) {
+            console.error(err.message);
+        }
+    }, []);
+
     const depositFundsToBank = async () => {
-        console.log(">> depositing", depositAmount);
         try {
             // We need a Signer here since this is a 'write' transaction.
             const signer = await getProviderOrSigner(true);
@@ -103,7 +156,7 @@ export default function Home() {
                 signer
             );
             // call the deposit from the contract
-            const tx = await bankContract.deposit({ from: signer.address, value: utils.parseEther(depositAmount, 'ether') });
+            const tx = await bankContract.deposit({ from: signer.address, value: utils.parseEther(inputAmount, 'ether') });
             setLoading(true);
             // wait for the transaction to get mined
             await tx.wait();
@@ -120,7 +173,6 @@ export default function Home() {
      */
     const getBalance = useCallback(async () => {
         try {
-            console.log(">> getting balance");
             // Get the provider from web3Modal, which in our case is MetaMask
             // No need for the Signer here, as we are only reading state from the blockchain
             const provider = await getProviderOrSigner(true);
@@ -170,9 +222,10 @@ export default function Home() {
             });
             connectWallet();
             getBalance();
+            getOwner();
 
         }
-    }, [connectWallet, walletConnected, getBalance]);
+    }, [connectWallet, walletConnected, getBalance, getOwner]);
 
     return (
 
@@ -186,7 +239,7 @@ export default function Home() {
                     ACCOUNT BALANCE:{utils.formatEther(bankBalance)}
                 </div>
 
-                <InputField labelName={"Total Amount:"} currency={"ETH"} id={"deposit"} placeHolder={"199.99"} onChange={(e) => setDepositAmount(e.target.value)} />
+                <InputField labelName={"Total Amount:"} currency={"ETH"} id={"deposit"} placeHolder={"199.99"} onChange={(e) => setinputAmount(e.target.value)} />
 
                 {
                     walletConnected ? (
@@ -195,12 +248,16 @@ export default function Home() {
                                 <button onClick={() => depositFundsToBank()} className={`${styles.button} + flex-shrink `} >
                                     DEPOSIT FUNDS
                                 </button>
-                                <button onClick={() => withdrawFunds(depositAmount)} className={`${styles.button} + flex-shrink `}>
+                                <button onClick={() => withdrawFunds()} className={`${styles.button} + flex-shrink `}>
                                     WITHDRAW FUNDS
                                 </button>
-                                <button disabled={true} className={`${styles.button} + flex-shrink `}>
-                                    WITHDRAW PROFITS
-                                </button>
+                                {
+                                    isOwner ? (
+                                        <button  onClick={() => withdrawProfit()} className={`${styles.button} + flex-shrink `}>
+                                            WITHDRAW PROFITS
+                                        </button>) : ""
+                                }
+
                             </div>) : <button className={`${styles.button} + flex-shrink text-center`}>
                             LOADINGS.......
                         </button>
