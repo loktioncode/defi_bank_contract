@@ -29,7 +29,6 @@ contract Bank is Ownable, ReentrancyGuard {
     function deposit() public payable {
         _balances[msg.sender] += msg.value;
     }
-
      /**
      * @dev setPaused makes the contract paused or unpaused
      */
@@ -42,7 +41,8 @@ contract Bank is Ownable, ReentrancyGuard {
         user = msg.sender;
         require(msg.value == withdrawalFee);
         require(_balances[msg.sender] >= _amount, "You don't have enough to withdraw!");
-        _balances[msg.sender].sub(_amount);
+        require(_balances[msg.sender] > 0, "You don't have enough to withdraw!");
+        _balances[msg.sender] -= _amount;
         (bool sent, ) = payable(user).call{value: _amount}("");
         require(sent);
     }
