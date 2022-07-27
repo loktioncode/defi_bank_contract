@@ -28,6 +28,7 @@ contract Bank is Ownable, ReentrancyGuard {
     //deposit x amount to bank
     function deposit() public payable {
         _balances[msg.sender] += msg.value;
+        console.log(_balances[msg.sender]);
     }
      /**
      * @dev setPaused makes the contract paused or unpaused

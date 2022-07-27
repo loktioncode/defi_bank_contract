@@ -1,21 +1,19 @@
 import Head from "next/head";
-import styles from "../styles/Home.module.css";
+import styles from "../styles/Save.module.css";
 import Web3Modal from "web3modal";
 import { BigNumber, Contract, providers, utils } from "ethers";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { CONTRACT_ADDRESS, abi } from "../constants";
 // import mainImg from "../public/vercel.svg";
-import NotificationMessage from "../components/Notification";
-import TxList from "../components/TxList";
-import InputField from "../components/InputField";
+import NotificationMessage from "./Notification";
+import TxList from "./TxList";
+import InputField from "./InputField";
 
 
 
-export default function Bank() {
+export default function Save() {
     const zero = BigNumber.from(0);
 
-    // isOwner gets the owner of the contract through the signed address
-    const [isOwner, setIsOwner] = useState(false);
 
     // walletConnected keep track of whether the user's wallet is connected or not
     const [walletConnected, setWalletConnected] = useState(false);
@@ -91,14 +89,10 @@ export default function Bank() {
             setLoading(false);
             await getBalance();
             setSuccess("Withdrawal successful");
-        } catch (err) {
+        } catch (error) {
+            setError(`Not enough funds to withdraw`);
             // window.alert(error.data);
-            setError(`Invalid amount: ${err.code}`);
-            if (err.reason.startsWith("execution reverted: ")) {
-             
-                setError(`${err.reason.substring(20)}`);
-
-            }
+            console.log(error);
 
         }
     };
@@ -130,31 +124,7 @@ export default function Bank() {
         }
     };
 
-    /**
- * getOwner: gets the contract owner by connected address
- */
-    const getOwner = useCallback(async () => {
-        try {
-            const provider = await getProviderOrSigner();
-            const bankContract = new Contract(
-                CONTRACT_ADDRESS,
-                abi,
-                provider
-            );
-            // call the owner function from the contract
-            const _owner = await bankContract.owner();
-            // we get signer to extract address of currently connected Metamask account
-            const signer = await getProviderOrSigner(true);
-            // Get the address associated to signer which is connected to Metamask
-            const address = await signer.getAddress();
-            if (address.toLowerCase() === _owner.toLowerCase()) {
-                setIsOwner(true);
-            }
-        } catch (err) {
-            console.error(err.message.data);
-            setError(`${err}`);
-        }
-    }, []);
+
 
     const depositFundsToBank = async () => {
         try {
@@ -247,20 +217,20 @@ export default function Bank() {
             });
             connectWallet();
             getBalance();
-            getOwner();
+      
 
         }
-    }, [connectWallet, walletConnected, getBalance, getOwner, error, success]);
+    }, [connectWallet, walletConnected, getBalance, error, success]);
 
     return (
         <>
 
-            <div className={styles.bank}>
+            <div className={styles.main}>
                 <div className={``}>
 
-                    <h1 className={styles.title}>BANK</h1>
+                    <h1 className={styles.title}>SAVE MONEY</h1>
                     <div className={styles.description}>
-                        Save crypto and get crypto loans!.
+                        Save for your future goals.
                     </div>
                     <NotificationMessage message={error ? error : success} error={error} success={success} />
 
@@ -286,12 +256,6 @@ export default function Bank() {
                                         </button> : null
                                     }
 
-                                    {
-                                        isOwner ? (
-                                            <button onClick={() => withdrawProfit()} className={`${styles.button29} + flex-1 `}>
-                                                WITHDRAW PROFITS
-                                            </button>) : ""
-                                    }
 
                                 </div>) :
                                 <div className={`flex items-center space-x-2`}>

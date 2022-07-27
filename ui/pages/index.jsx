@@ -5,16 +5,15 @@ import { BigNumber, Contract, providers, utils } from "ethers";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { CONTRACT_ADDRESS, abi } from "../constants";
 // import mainImg from "../public/vercel.svg";
-import ErrorMessage from "../components/Errors";
-import TxList from "../components/TxList";
+
 import Bank from "../components/Bank";
+import MiniDash from "../components/MiniDash";
+import Save from "../components/Save";
 import Nav from "../components/Nav";
 
 
 
 export default function Home() {
-
-  const [loading, setLoading] = useState(false);
 
 
   return (
@@ -25,12 +24,15 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Nav />
-
-      <Bank />
-
+      <h1 className={styles.title}>Save Crypto and get Crypto Loans!.</h1>
+      <div className="grid grid-cols-3 gap-5 justify-items-center">
+        <Bank />
+        <MiniDash />
+        <Save />
+      </div>
 
       <footer className={styles.footer}>
-        Made with &#10084; by Crypto Bro
+        Made with &#10084; by @loktioncode
       </footer>
     </div>
   );
